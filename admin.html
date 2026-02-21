@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Point Seven Coffee</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #1A1410;
+            --primary-brown: #4a3728;
+            --primary-gold: #D4AF37;
+            --brand-red: #BE2925;
+            --bg-cream: #FAF8F5;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --border-light: #EDE5CA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            color: var(--primary-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--primary-dark);
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo {
+            padding: 0 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .logo h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            color: var(--primary-gold);
+            font-size: 1.5rem;
+        }
+
+        .nav-items {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0.7;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            opacity: 1;
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 4px solid var(--primary-gold);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 3rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        /* Tables */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid var(--bg-cream);
+            color: #888;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid var(--bg-cream);
+            font-size: 0.9rem;
+        }
+
+        .status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff8e1;
+            color: #f57c00;
+        }
+
+        .status-completed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-gold);
+            color: var(--primary-gold);
+        }
+
+        #orderModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .loader {
+            display: flex;
+            justify-content: center;
+            padding: 3rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h2>P7 ADMIN</h2>
+        </div>
+        <ul class="nav-items">
+            <li class="nav-item active" onclick="showSection('orders')">
+                <i class="fas fa-shopping-bag"></i> Orders
+            </li>
+            <li class="nav-item" onclick="showSection('inquiries')">
+                <i class="fas fa-envelope"></i> Inquiries
+            </li>
+            <li class="nav-item" onclick="window.location.href='/'">
+                <i class="fas fa-external-link-alt"></i> Back to Site
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1>Dashboard Overview</h1>
+            <button class="btn btn-outline" onclick="fetchData()">Refresh Data</button>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Orders</h3>
+                <p id="totalOrders">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Revenue</h3>
+                <p id="totalRevenue">AED 0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Inquiries</h3>
+                <p id="totalInquiries">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <p id="pendingOrders">0</p>
+            </div>
+        </div>
+
+        <section id="ordersSection" class="card">
+            <h2>Recent Orders</h2>
+            <div id="ordersTableContainer">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="inquiriesSection" class="card" style="display: none;">
+            <h2>Recent Inquiries</h2>
+            <div id="inquiriesTableContainer">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Subject</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inquiriesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div id="orderModal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                <h2 id="modalTitle">Order Details</h2>
+                <button onclick="closeModal()"
+                    style="border: none; background: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+
+        let localOrders = [];
+        let localInquiries = [];
+
+        async function fetchData() {
+            try {
+                const ordersRes = await fetch(`${API_URL}/orders`);
+                const inquiriesRes = await fetch(`${API_URL}/inquiries`);
+
+                localOrders = await ordersRes.json();
+                localInquiries = await inquiriesRes.json();
+
+                renderOrders(localOrders);
+                renderInquiries(localInquiries);
+                updateStats(localOrders, localInquiries);
+            } catch (err) {
+                console.error('Error fetching admin data:', err);
+            }
+        }
+
+        function renderOrders(orders) {
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = [...orders].reverse().map(order => `
+                <tr>
+                    <td><strong>${order.orderId}</strong></td>
+                    <td>${order.customerInfo.name}</td>
+                    <td>AED ${order.total.toFixed(2)}</td>
+                    <td><span class="status status-pending">${order.status || 'Pending'}</span></td>
+                    <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                    <td><button class="btn btn-primary" onclick="viewOrder('${order._id}')">View</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderInquiries(inquiries) {
+            const tbody = document.getElementById('inquiriesTableBody');
+            tbody.innerHTML = [...inquiries].reverse().map(inq => `
+                <tr>
+                    <td><span class="status status-completed">${inq.type}</span></td>
+                    <td>${inq.name}</td>
+                    <td>${inq.subject || (inq.eventType + ' Booking')}</td>
+                    <td>${new Date(inq.createdAt).toLocaleDateString()}</td>
+                    <td><button class="btn btn-primary" onclick="viewInquiry('${inq._id}')">View</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function viewOrder(id) {
+            const order = localOrders.find(o => o._id === id);
+            if (!order) return;
+
+            document.getElementById('modalTitle').textContent = `Order Details: ${order.orderId}`;
+            const body = document.getElementById('modalBody');
+
+            const itemsHtml = order.items.map(item => `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #eee;">
+                    <span>${item.title} x${item.quantity}</span>
+                    <span>${item.price}</span>
+                </div>
+            `).join('');
+
+            body.innerHTML = `
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; color: #888; text-transform: uppercase; font-size: 0.8rem;">Customer Info</h4>
+                    <p><strong>Name:</strong> ${order.customerInfo.name}</p>
+                    <p><strong>Email:</strong> ${order.customerInfo.email}</p>
+                    <p><strong>Phone:</strong> ${order.customerInfo.phone}</p>
+                    <p><strong>Address:</strong> ${order.customerInfo.address}, ${order.customerInfo.city}</p>
+                    ${order.customerInfo.unit ? `<p><strong>Unit:</strong> ${order.customerInfo.unit}</p>` : ''}
+                </div>
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; color: #888; text-transform: uppercase; font-size: 0.8rem;">Order Items</h4>
+                    ${itemsHtml}
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem; font-weight: 700;">
+                        <span>Total</span>
+                        <span>AED ${order.total.toFixed(2)}</span>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 0.5rem; color: #888; text-transform: uppercase; font-size: 0.8rem;">Payment</h4>
+                    <p><strong>Method:</strong> ${order.paymentMethod.toUpperCase()}</p>
+                    <p><strong>Status:</strong> ${order.status || 'Pending'}</p>
+                </div>
+            `;
+
+            document.getElementById('orderModal').style.display = 'flex';
+        }
+
+        function viewInquiry(id) {
+            const inq = localInquiries.find(i => i._id === id);
+            if (!inq) return;
+
+            document.getElementById('modalTitle').textContent = `${inq.type.toUpperCase()} Inquiry Details`;
+            const body = document.getElementById('modalBody');
+
+            body.innerHTML = `
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; color: #888; text-transform: uppercase; font-size: 0.8rem;">Contact Info</h4>
+                    <p><strong>Name:</strong> ${inq.name}</p>
+                    <p><strong>Email:</strong> ${inq.email}</p>
+                    <p><strong>Phone:</strong> ${inq.phone || 'N/A'}</p>
+                </div>
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; color: #888; text-transform: uppercase; font-size: 0.8rem;">Request Details</h4>
+                    <p><strong>Subject:</strong> ${inq.subject || inq.eventType || 'N/A'}</p>
+                    <p><strong>Date:</strong> ${inq.date ? new Date(inq.date).toLocaleDateString() : 'N/A'}</p>
+                    <p><strong>Location:</strong> ${inq.location || inq.city || 'N/A'}</p>
+                    ${inq.guests ? `<p><strong>Guests:</strong> ${inq.guests}</p>` : ''}
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 0.5rem; color: #888; text-transform: uppercase; font-size: 0.8rem;">Message/Details</h4>
+                    <div style="background: #f9f9f9; padding: 1rem; border-radius: 8px; font-style: italic;">
+                        "${inq.message || inq.details || 'No message provided.'}"
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('orderModal').style.display = 'flex';
+        }
+
+        function updateStats(orders, inquiries) {
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('totalInquiries').textContent = inquiries.length;
+            const revenue = orders.reduce((sum, o) => sum + o.total, 0);
+            document.getElementById('totalRevenue').textContent = `AED ${revenue.toFixed(2)}`;
+            const pending = orders.filter(o => o.status === 'Pending' || !o.status).length;
+            document.getElementById('pendingOrders').textContent = pending;
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+
+            document.getElementById(`${section}Section`).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        // Initialize
+        fetchData();
+        setInterval(fetchData, 30000); // Auto refresh every 30s
+    </script>
+</body>
+
+</html>
