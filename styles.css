@@ -518,6 +518,20 @@ section {
     border-radius: 20px;
 }
 
+#aboutImage {
+    background-image: url('img/story.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+#cateringImage {
+    background-image: url('img/catering.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
 .about-content {
     padding: var(--spacing-md);
 }
@@ -939,7 +953,6 @@ section {
 .catering-image {
     width: 100%;
     height: 500px;
-    background: linear-gradient(135deg, var(--primary-brown), var(--accent-copper));
     border-radius: 20px;
     box-shadow: var(--shadow-lg);
 }

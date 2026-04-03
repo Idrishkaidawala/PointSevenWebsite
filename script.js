@@ -5,7 +5,7 @@
 // ===========================
 
 // Backend API URL
-const API_URL = '/api';
+const API_URL = 'http://localhost:5000/api';
 
 let menuData = {
     signature: [],
@@ -19,7 +19,7 @@ let merchandiseData = [];
 
 async function fetchProducts() {
     try {
-        const response = await fetch(`${API_URL}/products`);
+        const response = await fetch(`${API_URL}/products?t=${new Date().getTime()}`, { cache: "no-store" });
         const data = await response.json();
 
         // Structure the data back into categories
@@ -76,8 +76,8 @@ const jobListings = [
 // Helper to format image URL for CSS
 function getBgImage(imagePath) {
     if (!imagePath) return null;
-    // Use absolute path relative to root
-    const baseUrl = window.location.origin;
+    // Use explicit backend url for images
+    const baseUrl = 'http://localhost:5000';
     const encodedPath = imagePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
     return `url('${baseUrl}/${encodedPath}')`;
 }
@@ -225,6 +225,18 @@ menuTabs.forEach(tab => {
 const merchandiseGrid = document.getElementById('merchandiseGrid');
 
 function renderMerchandise() {
+    if (!merchandiseData || merchandiseData.length === 0) {
+        merchandiseGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 6rem 2rem; background: linear-gradient(145deg, #ffffff, #FAF8F5); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); max-width: 600px; margin: 2rem auto; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, #B87333, #D4AF37, #B87333);"></div>
+                <i class="fas fa-gift" style="font-size: 3rem; color: #D4AF37; margin-bottom: 1.5rem; opacity: 0.8;"></i>
+                <h3 style="color: #2C2420; font-size: 2.5rem; margin-bottom: 1rem; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600;">Coming Soon</h3>
+                <p style="color: #666; font-size: 1.1rem; line-height: 1.6; max-width: 400px; margin: 0 auto;">Our exclusive collection of artisanal merchandise is currently being crafted. We can't wait to share it with you!</p>
+            </div>
+        `;
+        return;
+    }
+
     merchandiseGrid.innerHTML = merchandiseData.map((item, index) => {
         const imgUrl = getBgImage(item.image);
         const bgStyle = imgUrl
