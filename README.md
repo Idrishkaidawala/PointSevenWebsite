@@ -3,88 +3,105 @@
 [![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Latest-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-white?style=for-the-badge&logo=vercel)](https://vercel.com/)
 
-> **Where Culture Meets Coffee.** A premium digital experience for Point Seven Coffee, blending the rich heritage of Emirati hospitality with modern specialty coffee culture.
+> **"Where Culture Meets Coffee."** A premium digital destination for Point Seven Coffee, blending the rich heritage of Emirati hospitality with modern specialty coffee culture and global culinary artistry.
 
 ---
 
 ## ✨ Overview
 
-Point Seven Coffee is more than just a café; it's a sanctuary for storytelling and community. This project serves as the official web platform, providing an immersive, high-end experience that allows users to explore artisanal menus, shop for exclusive merchandise, and locate our growing number of branches across the GCC.
+Point Seven Coffee is more than just a café; it's a sanctuary for storytelling and community connection. Rooted in the warmth of the UAE, we provide an immersive, high-end experience that allows guests to explore artisanal menus, shop for exclusive merchandise, and locate our flagship and upcoming branches across the Middle East.
 
-## 🚀 Features
+## 🚀 Key Features
 
-### Immersive Frontend
-- **Dynamic Menu:** Explore our curated selection of coffees and signature dishes with real-time updates from the database.
-- **Premium E-commerce:** A sleek, right-side sliding cart drawer for a seamless merchandise shopping experience.
-- **Global Store Locator:** Interactive Leaflet maps integration to find our branches in Dubai, Abu Dhabi, Doha, Riyadh, and beyond.
-- **Aesthetic Design:** GSAP-powered animations, glassmorphism UI elements, and a custom-built preloader.
-- **Responsive Web Design:** Fully optimized for mobile, tablet, and desktop viewing.
+### 🍽️ Immersive Gastronomy
+-   **Dynamic Menu Exploration:** Real-time categorized menu (Signatures, Coffee, Beverages, Desserts, Breakfast) pulled directly from the MongoDB Cloud.
+-   **Signature Innovation:** Interactive spotlight on brand-defining dishes like the **Saffron-infused Aseeda Fondant**, **Kunafa Milkcake**, and our signature **Signature Sandwich**.
+-   **Seasonal Exclusives:** Dynamic badges for "Winter Exclusives" (e.g., Premium Hot Chocolate) and "New" items.
 
-### Powerful Backend
-- **Express API:** Robust RESTful API handling product management, order processing, and contact requests.
-- **MongoDB Integration:** Persistent storage for menus, merchandise, and customer inquiries.
-- **Admin Dashboard:** A secured management interface for updating the café's offerings and monitoring business growth.
-- **Email Notifications:** Automated email handling via Nodemailer for catering and event inquiries.
+### 🛍️ Premium E-commerce & Logistics
+-   **Sliding Cart Experience:** A sleek, glassmorphic right-side drawer for seamless order management without leaving the page.
+-   **Secure Checkout:** Fully integrated checkout flow including Contact Info, Delivery Address, and multiple Payment Methods (Credit Card, Apple Pay, Cash).
+-   **Store Locator:** Interactive maps powered by **Leaflet.js** to navigate our locations in Sharjah and Fujairah, with "Coming Soon" notifications for regional hubs.
 
-## 🛠️ Tech Stack
+### 💼 Professional Services
+-   **Catering & Pop-Ups:** Dedicated request portal for bringing the Point Seven experience to private locations with custom menu planning.
+-   **Private Events:** immersive booking system for birthdays, corporate gatherings, and milestone celebrations.
+-   **Careers Portal:** Real-time job listings across different regions to join our growing team.
 
-- **Frontend:** HTML5, CSS3 (Vanilla), JavaScript (ES6+), [Leaflet.js](https://leafletjs.org/), [AOS](https://michalsnik.github.io/aos/)
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB via Mongoose
-- **Tooling:** Dotenv, Axios, CORS, Nodemailer, Nodemon
+### 🛠️ Admin Ecosystem
+-   **Dedicated Dashboard:** A secure `/admin.html` interface for real-time monitoring of business performance.
+-   **Order Tracking:** Detailed oversight of customer purchases, revenue stats, and delivery status.
+-   **Inquiry Management:** Centralized hub for processing Catering, Event, and General Contact requests.
 
-## 📦 Installation & Setup
+---
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Idrishkaidawala/PointSevenWebsite.git
-   cd PointSevenWebsite
-   ```
+## 🛠️ Technology Stack
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+-   **Frontend:** Semantic HTML5, Vanilla CSS3 (Custom Design System), JavaScript (ES6+), [Leaflet.js](https://leafletjs.org/) for Maps.
+-   **Backend:** Node.js & Express.js REST API.
+-   **Database:** MongoDB via Mongoose (Atlas Cloud Hosting).
+-   **Branding:** Premium Typography (Bricolage Grotesque, Inter), Font Awesome Icons.
+-   **Infrastructure:** Dotenv for security, CORS, Nodemon for development, Nodemailer for automated notifications.
 
-3. **Environment Setup:**
-   Create a `.env` file in the root directory and add your configurations:
-   ```env
-   PORT=3000
-   MONGODB_URI=your_mongodb_connection_string
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_app_password
-   ```
+---
 
-4. **Seed the Database (Optional):**
-   ```bash
-   node seed.js
-   ```
+## 📦 Installation & Local Setup
 
-5. **Start the application:**
-   - **Development mode:** `npm run dev`
-   - **Production mode:** `npm start`
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/Idrishkaidawala/PointSevenWebsite.git
+    cd PointSevenWebsite
+    ```
 
-## 📁 Project Structure
+2.  **Install Dependencies:**
+    ```bash
+    npm install
+    ```
 
-```text
-pointsevencoffee/
-├── img/                # Assets and brand imagery
-├── admin.html          # Management interface
-├── index.html          # Main landing page
-├── package.json        # Dependencies and scripts
-├── script.js           # Frontend logic & API integration
-├── seed.js             # Database initialization script
-├── server.js           # Express server & API endpoints
-├── styles.css        # Premium design system & typography
-└── .env                # Sensitive configurations
-```
+3.  **Configure Environment:**
+    Create a `.env` file in the root directory:
+    ```env
+    PORT=5000
+    MONGODB_URI=your_mongodb_atlas_connection_string
+    EMAIL_USER=your_smtp_email
+    EMAIL_PASS=your_smtp_password
+    ```
+
+4.  **Initialize Database:**
+    ```bash
+    node seed.js
+    ```
+
+5.  **Launch Platform:**
+    ```bash
+    npm run dev
+    ```
+    *Access the main site at `http://localhost:5000` and the admin panel at `http://localhost:5000/admin.html`.*
+
+---
+
+## 🗺️ Regional Expansion Roadmap
+
+We are rapidly expanding our footprint across the GCC to bring Point Seven culture to:
+-   📍 **Riyadh, KSA** (Opening Soon)
+-   📍 **Doha, Qatar**
+-   📍 **Abu Dhabi, UAE**
+-   📍 **Muscat, Oman**
 
 ---
 
 ## 🎨 Design Philosophy
 
-Inspired by the concept of "Artisanal Grace," the design uses a curated palette of **Deep Espresso**, **Desert Sand**, and **Gold accents**. Every interaction is designed to feel as smooth as a freshly brewed cup of coffee, prioritizing whitespace and elegant typography to reflect the brand's premium status.
+Inspired by **"Artisanal Grace,"** our design system utilizes a curated palette of:
+-   **Deep Espresso** (#1A1410) & **Rich Brown** (#4A3728)
+-   **Sunset Gold** (#D4AF37)
+-   **Desert Sand** (#FAF8F5)
+
+We prioritize whitespace, elegant typography, and subtle micro-animations to reflect the premium status of the Point Seven brand.
+
+---
 
 ## 📄 License
 
