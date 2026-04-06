@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -17,14 +16,11 @@ mongoose.connect(uri)
     .then(() => console.log('MongoDB connection established successfully'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// --- Email Configuration ---
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+// --- Email Configuration (Resend) ---
+// Sign up free at resend.com → API Keys → Create key → add to .env
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_FROM = process.env.EMAIL_FROM || 'Point Seven Coffee <orders@pointsevencoffee.com>';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM;
 
 // Helper function to send emails
 const sendConfirmationEmail = async (type, data) => {
@@ -98,26 +94,44 @@ const sendConfirmationEmail = async (type, data) => {
         `;
     }
 
-    const mailOptions = {
-        from: `"Point Seven Coffee" <${process.env.EMAIL_USER}>`,
-        to: recipientEmail,
-        subject: subject,
-        html: htmlContent
-    };
+    if (!RESEND_API_KEY) {
+        console.log('Email skipped — add RESEND_API_KEY to .env to enable emails');
+        return;
+    }
 
     try {
-        await transporter.sendMail(mailOptions);
+        // Send customer confirmation
+        await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: EMAIL_FROM,
+                to: [recipientEmail],
+                subject: subject,
+                html: htmlContent
+            })
+        });
         console.log(`Confirmation email sent to ${recipientEmail}`);
 
-        // Also notify admin
-        const adminMailOptions = {
-            from: `"Website System" <${process.env.EMAIL_USER}>`,
-            to: process.env.ADMIN_EMAIL,
-            subject: `New ${type.toUpperCase()} alert: ${data.orderId || data.name}`,
-            text: `New ${type} received from ${recipientEmail}. Check the database for details.`
-        };
-        await transporter.sendMail(adminMailOptions);
-
+        // Notify admin
+        if (ADMIN_EMAIL) {
+            await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${RESEND_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: EMAIL_FROM,
+                    to: [ADMIN_EMAIL],
+                    subject: `New ${type.toUpperCase()} alert: ${data.orderId || data.name}`,
+                    html: `<p>New ${type} received from <strong>${recipientEmail}</strong>.</p>`
+                })
+            });
+        }
     } catch (err) {
         console.error('Email sending error:', err);
     }
@@ -182,13 +196,45 @@ const Inquiry = mongoose.model('Inquiry', inquirySchema);
 
 // --- API Routes ---
 
-app.get('/api/products', async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.json(products);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+// --- Fallback Data (Comprehensive backup for all categories) ---
+const FALLBACK_PRODUCTS = [
+    // Signature
+    { title: "Signature Aseeda Fondant", description: "Our signature saffron-infused dessert with a molten center.", price: "AED 45", category: "signature", badge: "Signature", image: "img/Point7 Menu - Aseeda.png" },
+    { title: "Signature Sandwich", description: "Gourmet toasted brioche with avocado, beef/bacon, and eggs.", price: "AED 48", category: "signature", badge: "New", image: "img/Point7 Menu - Signature Sandwich.jpg" },
+    { title: "Hot Chocolate", description: "Rich cocoa with velvety whipped cream and chocolate shavings.", price: "AED 28", category: "signature", badge: "Winter Exclusive", image: "img/Point7 Menu - Hot Chocolate.jpg" },
+    { title: "Kunafa Milkcake", description: "Signature sponge cake soaked in sweet milk and topped with crispy kunafa.", price: "AED 38", category: "signature", badge: "New", image: "img/Point7 Menu - Kunafa Milkcake.jpg" },
+    
+    // Coffee
+    { title: "Espresso", description: "Rich, bold espresso from our signature blend.", price: "AED 15", category: "coffee", image: "img/Point7 Menu - Espresso.jpg" },
+    { title: "Cappuccino", description: "Classic cappuccino with velvety microfoam.", price: "AED 22", category: "coffee", image: "img/Point7 Menu - Cappuccino.jpg" },
+    { title: "Flat White", description: "Smooth espresso with silky steamed milk.", price: "AED 24", category: "coffee", image: "img/Point7 Menu - Flat White.jpg" },
+    { title: "V60 Pour Over", description: "Single-origin coffee brewed with professional technique.", price: "AED 28", category: "coffee", badge: "Specialty", image: "img/Point7 Menu - V60 Pour.jpg" },
+    { title: "Cold Brew", description: "Smooth cold brew steeped for 18 hours.", price: "AED 26", category: "coffee", image: "img/Point7 Menu - Cold Brew.jpg" },
+    
+    // Beverages
+    { title: "Mint Lemonade", description: "Fresh mint and lemon with a hint of rose water.", price: "AED 18", category: "beverages", image: "img/Point7 Menu - Mint Lemonade.jpg" },
+    { title: "Strawberry Mojito", description: "Vibrant mojito with fresh strawberries and mint.", price: "AED 22", category: "beverages", image: "img/Point7 Menu - Strawberry Mojito.jpg" },
+    { title: "Mango Smoothie", description: "Creamy mango smoothie topped with sweet cream.", price: "AED 24", category: "beverages", image: "img/Point7 Menu - Mango Smoothie.jpg" },
+    { title: "Date Smoothie", description: "Creamy smoothie with Medjool dates and banana.", price: "AED 24", category: "beverages", image: "img/Point7 Menu - Date Smoothie.jpg" },
+    
+    // Desserts
+    { title: "Creamy Coconut Cake", description: "Soft sponge cake topped with cream and shredded coconut.", price: "AED 38", category: "desserts", badge: "Popular", image: "img/Point7 Menu - Creamy Coconut Cake 2.jpg" },
+    { title: "Lotus Milkcake", description: "Sponge cake with Lotus Biscoff spread and crumbs.", price: "AED 38", category: "desserts", image: "img/Point7 Menu - Lotus Milkcake.jpg" },
+    { title: "Irresistible Tiramisu", description: "Decadent Tiramisu featuring espresso-soaked layers.", price: "AED 40", category: "desserts", image: "img/Point7 Menu - Irresistible Tiramisu 2.jpg" },
+    { title: "Salted Caramel French Toast", description: "Golden brioche sticks drizzled with salted caramel.", price: "AED 45", category: "desserts", image: "img/Point7 Menu - P7 Salted Caramel French Toast 1.jpg" },
+    
+    // Breakfast
+    { title: "Shakshuka", description: "Poached eggs in spiced tomato sauce with fresh herbs.", price: "AED 38", category: "breakfast", image: "img/DSC05030.jpg" },
+    { title: "Signature Sandwich", description: "Gourmet brioche with layered avocado and eggs.", price: "AED 48", category: "breakfast", badge: "New", image: "img/Point7 Menu - Signature Sandwich.jpg" },
+    { title: "Sunset Toast", description: "Sourdough with tomato pesto sauce and creamy feta.", price: "AED 35", category: "breakfast", image: "img/AKS06006.jpg" },
+    { title: "Creamy Avocado Toast", description: "Sourdough glazed with creamy cheese and scrambled eggs.", price: "AED 42", category: "breakfast", image: "img/AKS06017.jpg" }
+];
+
+app.get('/api/products', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    console.log('Serving full menu from fallback storage');
+    res.json(FALLBACK_PRODUCTS);
 });
 
 app.get('/api/orders', async (req, res) => {
