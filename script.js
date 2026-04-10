@@ -4,8 +4,32 @@
 // Data
 // ===========================
 
-// Backend API URL
-const API_URL = '/api';
+// Menu Data (Local fallback for GitHub Pages)
+const LOCAL_MENU_DATA = [
+    { title: "Signature Aseeda Fondant", description: "Our signature saffron-infused dessert with a molten center.", price: "AED 45", category: "signature", badge: "Signature", image: "img/Point7 Menu - Aseeda.png" },
+    { title: "Signature Sandwich", description: "Gourmet toasted brioche with avocado, beef/bacon, and eggs.", price: "AED 48", category: "signature", badge: "New", image: "img/Point7 Menu - Signature Sandwich.jpg" },
+    { title: "Hot Chocolate", description: "Rich cocoa with velvety whipped cream and chocolate shavings.", price: "AED 28", category: "signature", badge: "Winter Exclusive", image: "img/Point7 Menu - Hot Chocolate.jpg" },
+    { title: "Kunafa Milkcake", description: "Signature sponge cake soaked in sweet milk and topped with crispy kunafa.", price: "AED 38", category: "signature", badge: "New", image: "img/Point7 Menu - Kunafa Milkcake.jpg" },
+    { title: "Espresso", description: "Rich, bold espresso from our signature blend.", price: "AED 15", category: "coffee", image: "img/Point7 Menu - Espresso.jpg" },
+    { title: "Cappuccino", description: "Classic cappuccino with velvety microfoam.", price: "AED 22", category: "coffee", image: "img/Point7 Menu - Cappuccino.jpg" },
+    { title: "Flat White", description: "Smooth espresso with silky steamed milk.", price: "AED 24", category: "coffee", image: "img/Point7 Menu - Flat White.jpg" },
+    { title: "V60 Pour Over", description: "Single-origin coffee brewed with professional technique.", price: "AED 28", category: "coffee", badge: "Specialty", image: "img/Point7 Menu - V60 Pour.jpg" },
+    { title: "Cold Brew", description: "Smooth cold brew steeped for 18 hours.", price: "AED 26", category: "coffee", image: "img/Point7 Menu - Cold Brew.jpg" },
+    { title: "Mint Lemonade", description: "Fresh mint and lemon with a hint of rose water.", price: "AED 18", category: "beverages", image: "img/Point7 Menu - Mint Lemonade.jpg" },
+    { title: "Strawberry Mojito", description: "Vibrant mojito with fresh strawberries and mint.", price: "AED 22", category: "beverages", image: "img/Point7 Menu - Strawberry Mojito.jpg" },
+    { title: "Mango Smoothie", description: "Creamy mango smoothie topped with sweet cream.", price: "AED 24", category: "beverages", image: "img/Point7 Menu - Mango Smoothie.jpg" },
+    { title: "Date Smoothie", description: "Creamy smoothie with Medjool dates and banana.", price: "AED 24", category: "beverages", image: "img/Point7 Menu - Date Smoothie.jpg" },
+    { title: "Creamy Coconut Cake", description: "Soft sponge cake topped with cream and shredded coconut.", price: "AED 38", category: "desserts", badge: "Popular", image: "img/Point7 Menu - Creamy Coconut Cake 2.jpg" },
+    { title: "Lotus Milkcake", description: "Sponge cake with Lotus Biscoff spread and crumbs.", price: "AED 38", category: "desserts", image: "img/Point7 Menu - Lotus Milkcake.jpg" },
+    { title: "Irresistible Tiramisu", description: "Decadent Tiramisu featuring espresso-soaked layers.", price: "AED 40", category: "desserts", image: "img/Point7 Menu - Irresistible Tiramisu 2.jpg" },
+    { title: "Salted Caramel French Toast", description: "Golden brioche sticks drizzled with salted caramel.", price: "AED 45", category: "desserts", image: "img/Point7 Menu - P7 Salted Caramel French Toast 1.jpg" },
+    { title: "Shakshuka", description: "Poached eggs in spiced tomato sauce with fresh herbs.", price: "AED 38", category: "breakfast", image: "img/DSC05030.jpg" },
+    { title: "Signature Sandwich", description: "Gourmet brioche with layered avocado and eggs.", price: "AED 48", category: "breakfast", badge: "New", image: "img/Point7 Menu - Signature Sandwich.jpg" },
+    { title: "Sunset Toast", description: "Sourdough with tomato pesto sauce and creamy feta.", price: "AED 35", category: "breakfast", image: "img/AKS06006.jpg" },
+    { title: "Creamy Avocado Toast", description: "Sourdough glazed with creamy cheese and scrambled eggs.", price: "AED 42", category: "breakfast", image: "img/AKS06017.jpg" }
+];
+
+const API_DISABLED = true; // GitHub Pages is static
 
 let menuData = {
     signature: [],
@@ -19,8 +43,8 @@ let merchandiseData = [];
 
 async function fetchProducts() {
     try {
-        const response = await fetch(`${API_URL}/products?t=${new Date().getTime()}`, { cache: "no-store" });
-        const data = await response.json();
+        // Use local data instead of API for GitHub Pages
+        const data = LOCAL_MENU_DATA;
 
         // Structure the data back into categories
         menuData = {
@@ -36,7 +60,7 @@ async function fetchProducts() {
         renderMenuItems(currentMenuCategory);
         renderMerchandise();
     } catch (err) {
-        console.error('Error fetching products:', err);
+        console.error('Error loading local products:', err);
     }
 }
 
@@ -76,10 +100,8 @@ const jobListings = [
 // Helper to format image URL for CSS
 function getBgImage(imagePath) {
     if (!imagePath) return null;
-    // Use explicit backend url for images
-    const baseUrl = window.location.origin;
     const encodedPath = imagePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
-    return `url('${baseUrl}/${encodedPath}')`;
+    return `url('${encodedPath}')`;
 }
 
 // Helper to toggle payment fields
@@ -565,38 +587,13 @@ checkoutForm.addEventListener('submit', (e) => {
 
     setTimeout(async () => {
         try {
-            const checkoutData = {
-                orderId: 'P7-' + Math.floor(Math.random() * 10000),
-                items: cart,
-                subtotal: parseFloat(document.getElementById('checkoutSubtotal').textContent.replace('AED ', '')),
-                deliveryFee: 15,
-                tax: parseFloat(document.getElementById('checkoutTax').textContent.replace('AED ', '')),
-                total: parseFloat(document.getElementById('checkoutFinalTotal').textContent.replace('AED ', '')),
-                customerInfo: {
-                    name: document.getElementById('checkoutName').value,
-                    email: document.getElementById('checkoutEmail').value,
-                    phone: document.getElementById('checkoutPhone').value,
-                    address: document.getElementById('checkoutAddress').value,
-                    city: document.getElementById('checkoutCity').value,
-                    unit: document.getElementById('checkoutUnit').value
-                },
-                paymentMethod: document.querySelector('input[name="payment"]:checked').value
-            };
-
-            const response = await fetch(`${API_URL}/orders`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(checkoutData)
-            });
-
-            if (!response.ok) throw new Error('Order submission failed');
-
-            const order = await response.json();
+            const orderId = 'P7-' + Math.floor(Math.random() * 10000);
+            
+            // Log for debug (won't save to DB on GitHub Pages)
+            console.log('Order simulated successfully:', orderId);
 
             // Success State
-            document.getElementById('orderRef').textContent = order.orderId;
-            document.getElementById('confirmedEmail').textContent = order.customerInfo.email;
-
+            document.getElementById('orderRef').textContent = orderId;
             document.getElementById('checkoutFormStep').style.display = 'none';
             document.getElementById('checkoutSuccess').style.display = 'flex';
 
@@ -604,7 +601,7 @@ checkoutForm.addEventListener('submit', (e) => {
             cart = [];
             updateCart();
         } catch (err) {
-            console.error('Checkout error:', err);
+            console.error('Checkout simulator error:', err);
             showNotification('Checkout failed. Please try again.', 'error');
         } finally {
             btn.innerHTML = originalText;
@@ -663,16 +660,14 @@ eventForm.addEventListener('submit', async (e) => {
     };
 
     try {
-        const response = await fetch(`${API_URL}/inquiries`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-        if (!response.ok) throw new Error('Submission failed');
-        showNotification('Event booking request submitted successfully!');
-        eventForm.reset();
+        console.log('Form submission simulated:', formData);
+        showNotification('Request submitted successfully! We\'ll get back to you soon.');
+        if (contactForm) contactForm.reset();
+        if (cateringForm) cateringForm.reset();
+        if (eventForm) eventForm.reset();
+        closeModal('cateringModal');
     } catch (err) {
-        showNotification('Submission failed. Please try again.', 'error');
+        showNotification('Submission failed.', 'error');
     }
 });
 
