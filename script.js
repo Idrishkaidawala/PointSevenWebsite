@@ -5,7 +5,7 @@
 // ===========================
 
 // Backend API URL
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '/api';
 
 let menuData = {
     signature: [],
@@ -77,7 +77,7 @@ const jobListings = [
 function getBgImage(imagePath) {
     if (!imagePath) return null;
     // Use explicit backend url for images
-    const baseUrl = 'http://localhost:5000';
+    const baseUrl = window.location.origin;
     const encodedPath = imagePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
     return `url('${baseUrl}/${encodedPath}')`;
 }

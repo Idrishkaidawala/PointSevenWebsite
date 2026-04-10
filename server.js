@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('path');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -16,126 +17,7 @@ mongoose.connect(uri)
     .then(() => console.log('MongoDB connection established successfully'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// --- Email Configuration (Resend) ---
-// Sign up free at resend.com → API Keys → Create key → add to .env
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || 'Point Seven Coffee <orders@pointsevencoffee.com>';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM;
 
-// Helper function to send emails
-const sendConfirmationEmail = async (type, data) => {
-    let subject, htmlContent, recipientEmail;
-
-    if (type === 'order') {
-        recipientEmail = data.customerInfo.email;
-        subject = `Order Confirmed: ${data.orderId} - Point Seven Coffee`;
-
-        const itemsList = data.items.map(item => `
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.title} x${item.quantity}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.price}</td>
-            </tr>
-        `).join('');
-
-        htmlContent = `
-            <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: auto; border: 1px solid #EDE5CA; border-radius: 15px; overflow: hidden;">
-                <div style="background-color: #BE2925; padding: 20px; text-align: center;">
-                    <h1 style="color: #EDE5CA; margin: 0;">Order Confirmed!</h1>
-                </div>
-                <div style="padding: 30px; background-color: #ffffff;">
-                    <p>Hello ${data.customerInfo.name},</p>
-                    <p>Thank you for choosing <strong>Point Seven Coffee</strong>. We've received your order and are preparing it with care.</p>
-                    
-                    <div style="background-color: #FAF8F5; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                        <h3 style="margin-top: 0; color: #BE2925;">Order Summary: ${data.orderId}</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            ${itemsList}
-                            <tr>
-                                <td style="padding: 10px; font-weight: bold;">Total</td>
-                                <td style="padding: 10px; font-weight: bold; text-align: right;">AED ${data.total.toFixed(2)}</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <p><strong>Delivery Address:</strong><br>${data.customerInfo.address}, ${data.customerInfo.city}</p>
-                    
-                    <p style="color: #4A4A4A; font-size: 0.9em;">If you have any questions, please reply to this email or call us at +971 55 498 9211.</p>
-                </div>
-                <div style="background-color: #EDE5CA; padding: 15px; text-align: center; color: #1A1A1A; font-size: 0.8em;">
-                    &copy; 2026 Point Seven Coffee. All rights reserved.
-                </div>
-            </div>
-        `;
-    } else {
-        recipientEmail = data.email;
-        const inquiryType = data.type.charAt(0).toUpperCase() + data.type.slice(1);
-        subject = `We've received your ${inquiryType} request - Point Seven Coffee`;
-
-        htmlContent = `
-            <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: auto; border: 1px solid #EDE5CA; border-radius: 15px; overflow: hidden;">
-                <div style="background-color: #BE2925; padding: 20px; text-align: center;">
-                    <h1 style="color: #EDE5CA; margin: 0;">Thank You!</h1>
-                </div>
-                <div style="padding: 30px; background-color: #ffffff;">
-                    <p>Hello ${data.name},</p>
-                    <p>We've received your <strong>${inquiryType}</strong> request regarding "${data.subject || 'General Inquiry'}".</p>
-                    <p>A member of our team will review your details and get back to you within 24 hours.</p>
-                    
-                    <div style="border-left: 4px solid #BE2925; padding-left: 15px; margin: 20px 0; color: #4A4A4A;">
-                        <p><em>"${data.message || data.details || 'Request submitted successfully.'}"</em></p>
-                    </div>
-
-                    <p>Stay tuned for a response!</p>
-                </div>
-                <div style="background-color: #EDE5CA; padding: 15px; text-align: center; color: #1A1A1A; font-size: 0.8em;">
-                    &copy; 2026 Point Seven Coffee. All rights reserved.
-                </div>
-            </div>
-        `;
-    }
-
-    if (!RESEND_API_KEY) {
-        console.log('Email skipped — add RESEND_API_KEY to .env to enable emails');
-        return;
-    }
-
-    try {
-        // Send customer confirmation
-        await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${RESEND_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                from: EMAIL_FROM,
-                to: [recipientEmail],
-                subject: subject,
-                html: htmlContent
-            })
-        });
-        console.log(`Confirmation email sent to ${recipientEmail}`);
-
-        // Notify admin
-        if (ADMIN_EMAIL) {
-            await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${RESEND_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    from: EMAIL_FROM,
-                    to: [ADMIN_EMAIL],
-                    subject: `New ${type.toUpperCase()} alert: ${data.orderId || data.name}`,
-                    html: `<p>New ${type} received from <strong>${recipientEmail}</strong>.</p>`
-                })
-            });
-        }
-    } catch (err) {
-        console.error('Email sending error:', err);
-    }
-};
 
 // --- Schemas ---
 
@@ -251,8 +133,6 @@ app.post('/api/orders', async (req, res) => {
         const newOrder = new Order(req.body);
         const savedOrder = await newOrder.save();
 
-        // Trigger Email (async)
-        sendConfirmationEmail('order', savedOrder);
 
         res.status(201).json(savedOrder);
     } catch (err) {
@@ -274,8 +154,6 @@ app.post('/api/inquiries', async (req, res) => {
         const newInquiry = new Inquiry(req.body);
         const savedInquiry = await newInquiry.save();
 
-        // Trigger Email (async)
-        sendConfirmationEmail('inquiry', savedInquiry);
 
         res.status(201).json(savedInquiry);
     } catch (err) {
@@ -284,9 +162,19 @@ app.post('/api/inquiries', async (req, res) => {
 });
 
 // Serve static files
-app.use('/img', express.static('img'));
-app.use(express.static('./'));
+app.use('/img', express.static(path.join(__dirname, 'img')));
+app.use(express.static(path.join(__dirname, './')));
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port: ${PORT}`);
+// Fallback to index.html for any other route (SPA-like or just to ensure root works)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+// Conditionally listen if not running as a Vercel function
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port: ${PORT}`);
+    });
+}
+
+module.exports = app;
